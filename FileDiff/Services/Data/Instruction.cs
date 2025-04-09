@@ -5,8 +5,8 @@ namespace FileDiff.Services.Data;
 /// </summary>
 public abstract class Instruction : IPrintable
 {
-    protected int StartingLineNumber;
-    protected int NumberOfLinesToChange;
+    public int StartingLineNumber { get; protected set; }
+    public int NumberOfLinesToChange { get; protected set; }
     
     public abstract void Print();
 }

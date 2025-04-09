@@ -5,17 +5,17 @@ namespace FileDiff.Services.Data;
 /// </summary>
 public class InsertInstruction : Instruction
 {
-    private string _content;
+    public string Content { get; private set; }
 
     public InsertInstruction(int startingLineNumber, int numberOfLinesToChange, string content)
     {
         StartingLineNumber = startingLineNumber;
         NumberOfLinesToChange = numberOfLinesToChange;
-        _content = content;
+        Content = content;
     }
 
     public override void Print()
     {
-        Console.WriteLine($"Insert {NumberOfLinesToChange} lines at line {StartingLineNumber}\n{_content}");
+        Console.WriteLine($"Insert {NumberOfLinesToChange} lines at line {StartingLineNumber}\n{Content}");
     }
 }
