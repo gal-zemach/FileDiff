@@ -26,8 +26,18 @@ public static class MyersComparer
         return instructions;
     }
 
+    /// <summary>
+    /// Finds the shortest amount of steps to transform lines1 into lines2.
+    /// Returns a trace of all iterations for later backtracking.
+    /// </summary>
     private static List<OffsetArray<int>> BuildMyersTrace(List<string> lines1, List<string> lines2)
     {
+        // Main Variables:
+        //      x, y: current indices in list1 and list2 respectively
+        //      k = x-y: tracks how many removals/insertions we've made
+        //      d: current amount of steps applied to lines1
+        //      v: stores the furthest-x achieved so far in each relevant k position
+        
         var trace = new List<OffsetArray<int>>();
         
         // tokenizing lists for quicker comparisons
@@ -35,12 +45,11 @@ public static class MyersComparer
         List<int> lines1Tokens = tokenized.Item1;
         List<int> lines2Tokens = tokenized.Item2;
         
-        int MaxSteps = lines1.Count + lines2.Count;
-        
-        var v = new OffsetArray<int>(2 * Math.Max(MaxSteps, 1) + 1, MaxSteps);
+        int maxSteps = lines1.Count + lines2.Count;
+        var v = new OffsetArray<int>(2 * Math.Max(maxSteps, 1) + 1, maxSteps);
         v[1] = 0;
 
-        for (int d = 0; d <= MaxSteps; d++)
+        for (int d = 0; d <= maxSteps; d++)
         {
             for (int k = -d; k <= d; k += 2)
             {
@@ -78,6 +87,9 @@ public static class MyersComparer
         return trace;
     }
 
+    /// <summary>
+    /// Traces back the path found by the Myers algorithm while creating the set of instructions
+    /// </summary>
     private static List<Instruction> Traceback(List<OffsetArray<int>> trace, List<string> lines1, List<string> lines2)
     {
         var instructions = new List<Instruction>();
