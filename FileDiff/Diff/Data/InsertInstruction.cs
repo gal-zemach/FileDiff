@@ -11,6 +11,7 @@ public class InsertInstruction : Instruction
         InstructionType = Type.Insert;
     }
 
+    /// <inheritdoc cref="Instruction.Print"/>
     public override void Print()
     {
         Console.WriteLine($"Insert {LinesCount} lines at line {StartingLine}\n{Content}");

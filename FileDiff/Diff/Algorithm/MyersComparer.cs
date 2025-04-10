@@ -1,4 +1,5 @@
 using FileDiff.Diff.Data;
+using FileDiff.Common;
 
 namespace FileDiff.Diff.Algorithm;
 
@@ -6,59 +7,51 @@ namespace FileDiff.Diff.Algorithm;
 /// Myers diff algorithm for comparing files.
 /// Explanation and references: https://blog.jcoglan.com/2017/02/12/the-myers-diff-algorithm-part-1/
 /// </summary>
-public class MyersComparer
+public static class MyersComparer
 {
-    private readonly List<string> _lines1;
-    private readonly List<string> _lines2;
-
-    private int MaxSteps => _lines1.Count + _lines2.Count;
-    
-    /// <summary>
-    /// Used for negative array indices
-    /// </summary>
-    private int Index(int i) => MaxSteps + i;
-    
-    public MyersComparer(IEnumerable<string> lines1, IEnumerable<string> lines2)
-    {
-        _lines1 = lines1.ToList();
-        _lines2 = lines2.ToList();
-    }
-
     /// <summary>
     /// Compares the 2 files and returns a sequence of instructions for transforming file1 into file2
     /// </summary>
-    public List<Instruction> Compare()
+    /// <param name="file1">source file</param>
+    /// <param name="file2">destination file</param>
+    /// <returns>Sequence of single-line instructions for transforming file1 into file2</returns>
+    public static List<Instruction> Compare(IEnumerable<string> file1, IEnumerable<string> file2)
     {
-        List<int[]> trace = BuildMyersTrace(_lines1, _lines2);
-        List<Instruction> instructions = Traceback(trace);
+        List<string> lines1 = file1.ToList();
+        List<string> lines2 = file2.ToList();
+        
+        List<OffsetArray<int>> trace = BuildMyersTrace(lines1, lines2);
+        List<Instruction> instructions = Traceback(trace, lines1, lines2);
         
         return instructions;
     }
 
-    private List<int[]> BuildMyersTrace(List<string> lines1, List<string> lines2)
+    private static List<OffsetArray<int>> BuildMyersTrace(List<string> lines1, List<string> lines2)
     {
-        var trace = new List<int[]>();
+        var trace = new List<OffsetArray<int>>();
         
         // tokenizing lists for quicker comparisons
         var tokenized = TokenizeLists(lines1, lines2);
         List<int> lines1Tokens = tokenized.Item1;
         List<int> lines2Tokens = tokenized.Item2;
         
-        int[] v = new int[2 * Math.Max(MaxSteps, 1) + 1];
-        v[Index(1)] = 0;
+        int MaxSteps = lines1.Count + lines2.Count;
+        
+        var v = new OffsetArray<int>(2 * Math.Max(MaxSteps, 1) + 1, MaxSteps);
+        v[1] = 0;
 
         for (int d = 0; d <= MaxSteps; d++)
         {
             for (int k = -d; k <= d; k += 2)
             {
                 int x;
-                if (k == -d || (k != d && v[Index(k - 1)] < v[Index(k + 1)]))
+                if (k == -d || (k != d && v[k - 1] < v[k + 1]))
                 {
-                    x = v[Index(k + 1)];  // downward move
+                    x = v[k + 1];  // downward move
                 }
                 else
                 {
-                    x = v[Index(k - 1)] + 1;  // rightward move
+                    x = v[k - 1] + 1;  // rightward move
                 }
 
                 int y = x - k;
@@ -70,36 +63,36 @@ public class MyersComparer
                     y++;
                 }
                 
-                v[Index(k)] = x;
+                v[k] = x;
 
                 if (x >= lines1Tokens.Count && y >= lines2Tokens.Count)
                 {
-                    trace.Add((int[])v.Clone());
+                    trace.Add(v.Clone());
                     return trace;
                 }
             }
             
-            trace.Add((int[])v.Clone());
+            trace.Add(v.Clone());
         }
         
         return trace;
     }
 
-    private List<Instruction> Traceback(List<int[]> trace)
+    private static List<Instruction> Traceback(List<OffsetArray<int>> trace, List<string> lines1, List<string> lines2)
     {
-        List<Instruction> instructions = [];
+        var instructions = new List<Instruction>();
 
-        int x = _lines1.Count;
-        int y = _lines2.Count;
+        int x = lines1.Count;
+        int y = lines2.Count;
 
         for (int d = trace.Count - 1; d >= 0; d--)
         {
-            int[] v = trace[d];
+            OffsetArray<int> v = trace[d];
             int k = x - y;
 
             int prevK;
             bool isDownwardMove = false;
-            if (k == -d || k != d && v[Index(k - 1)] < v[Index(k + 1)])
+            if (k == -d || k != d && v[k - 1] < v[k + 1])
             {
                 isDownwardMove = true;
                 prevK = k + 1;
@@ -109,7 +102,7 @@ public class MyersComparer
                 prevK = k - 1;
             }
             
-            int prevX = v[Index(prevK)];
+            int prevX = v[prevK];
             int prevY = prevX - prevK;
 
             while (x > prevX && y > prevY)  // diagonal moves
@@ -121,8 +114,8 @@ public class MyersComparer
             if (d > 0)
             {
                 instructions.Add(isDownwardMove
-                    ? new InsertInstruction(y - 1, 1, _lines2[y - 1])
-                    : new RemoveInstruction(x - 1, 1, _lines1[x - 1]));
+                    ? new InsertInstruction(y - 1, 1, lines2[y - 1])
+                    : new RemoveInstruction(x - 1, 1, lines1[x - 1]));
             }
             
             x = prevX;

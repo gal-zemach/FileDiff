@@ -11,6 +11,7 @@ public class RemoveInstruction : Instruction
         InstructionType = Type.Remove;
     }
     
+    /// <inheritdoc cref="Instruction.Print"/>
     public override void Print()
     {
         Console.WriteLine($"Remove {LinesCount} lines from line {StartingLine}");

@@ -3,6 +3,9 @@ using FileDiff.Diff.Data;
 
 namespace FileDiff.Diff;
 
+/// <summary>
+/// Compares files and returns the diff between them
+/// </summary>
 public static class FileComparer
 {
     /// <summary>
@@ -13,7 +16,7 @@ public static class FileComparer
     /// <returns>List of <see cref="Instruction"/> containing the sequence</returns>
     public static List<Instruction> Compare(IEnumerable<string> lines1, IEnumerable<string> lines2)
     {
-        var rawInstructions = new MyersComparer(lines1, lines2).Compare();
+        var rawInstructions = MyersComparer.Compare(lines1, lines2);
         var instructions = ProcessInstructions(rawInstructions);
 
         return instructions;
@@ -26,13 +29,13 @@ public static class FileComparer
             return new List<Instruction>();
         }
         
-        List<List<Instruction>> groups = GroupRawInstructions(rawInstructions);
+        List<List<Instruction>> groups = GroupInstructions(rawInstructions);
         List<Instruction> instructions = BuildInstructions(groups);
         
         return instructions;
     }
 
-    private static List<List<Instruction>> GroupRawInstructions(List<Instruction> rawInstructions)
+    private static List<List<Instruction>> GroupInstructions(List<Instruction> rawInstructions)
     {
         List<List<Instruction>> groups = new List<List<Instruction>>();
         var currentGroup = new List<Instruction>(){ rawInstructions[0] };
