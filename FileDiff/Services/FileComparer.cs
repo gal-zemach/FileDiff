@@ -97,6 +97,7 @@ public static class FileComparer
         switch (instructionType)
         {
             case RawInstruction.Type.Insert:
+                // no need to add offset since all lines up-to startLine are identical to file2
                 result = new InsertInstruction(startLine, numberOfChangedLines, content);
                 lineNumberOffset += numberOfChangedLines;
                 break;
@@ -106,8 +107,6 @@ public static class FileComparer
                 lineNumberOffset -= numberOfChangedLines;
                 break;
         }
-        
-        result.Print();
         
         return result;
     }
