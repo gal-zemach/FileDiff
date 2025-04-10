@@ -134,7 +134,7 @@ public static class MyersComparer
         List<int> lines1Tokens = TokenizeList(lines1, tokensDictionary, ref nextToken);
         List<int> lines2Tokens = TokenizeList(lines2, tokensDictionary, ref nextToken);
         
-        return new Tuple<List<int>, List<int>>(lines1Tokens, lines2Tokens);
+        return Tuple.Create(lines1Tokens, lines2Tokens);
     }
 
     private static List<int> TokenizeList(List<string> list, Dictionary<string, int> tokensDictionary, ref int nextToken)
