@@ -26,17 +26,25 @@ public static class FileComparer
             return new List<Instruction>();
         }
         
+        List<List<RawInstruction>> groups = GroupRawInstructions(rawInstructions);
+        List<Instruction> instructions = BuildInstructions(groups);
+        
+        return instructions;
+    }
+
+    private static List<List<RawInstruction>> GroupRawInstructions(List<RawInstruction> rawInstructions)
+    {
         List<List<RawInstruction>> groups = new List<List<RawInstruction>>();
         var currentGroup = new List<RawInstruction>(){ rawInstructions[0] };
         groups.Add(currentGroup);
 
         for (int i = 1; i < rawInstructions.Count; i++)
         {
-            var current = rawInstructions[i];
             var previous = rawInstructions[i - 1];
+            var current = rawInstructions[i];
 
             if (current.InstructionType == previous.InstructionType &&
-                current.LineNumber == previous.LineNumber + 1)
+                current.LineNumber - 1 == previous.LineNumber)
             {
                 currentGroup.Add(current);
             }
@@ -47,10 +55,16 @@ public static class FileComparer
             }
         }
 
+        return groups;
+    }
+
+    private static List<Instruction> BuildInstructions(List<List<RawInstruction>> rawInstructionGroups)
+    {
         var result = new List<Instruction>();
-        foreach (var group in groups)
+        int lineNumberOffset = 0;
+        foreach (var group in rawInstructionGroups)
         {
-            var newInstruction = BuildInstruction(group);
+            var newInstruction = BuildInstruction(group, ref lineNumberOffset);
             if (newInstruction != null)
             {
                 result.Add(newInstruction);
@@ -60,7 +74,7 @@ public static class FileComparer
         return result;
     }
 
-    private static Instruction? BuildInstruction(List<RawInstruction> instructions)
+    private static Instruction? BuildInstruction(List<RawInstruction> instructions, ref int lineNumberOffset)
     {
         RawInstruction.Type instructionType = instructions[0].InstructionType;
         if (instructionType == RawInstruction.Type.None)
@@ -68,27 +82,33 @@ public static class FileComparer
             return null;
         }
         
-        int startLine = instructions[0].LineNumber;
-        int numberOfLines = 1;
+        int startLine = instructions[0].LineNumber + 1;  // 1 is added for 1-based printing
+        int numberOfChangedLines = 1;
         string content = instructions[0].Content;
 
-        // TODO: Number of lines is not accumulating
         for (int i = 1; i < instructions.Count; i++)
         {
             content += "\n";
-            numberOfLines++;
+            numberOfChangedLines++;
             content += instructions[i].Content;
         }
-
+        
+        Instruction? result = null;
         switch (instructionType)
         {
             case RawInstruction.Type.Insert:
-                return new InsertInstruction(startLine, numberOfLines, content);
-            
-            case RawInstruction.Type.Remove:
-                return new RemoveInstruction(startLine, numberOfLines);
-        }
+                result = new InsertInstruction(startLine, numberOfChangedLines, content);
+                lineNumberOffset += numberOfChangedLines;
+                break;
 
-        return null;
+            case RawInstruction.Type.Remove:
+                result = new RemoveInstruction(startLine + lineNumberOffset, numberOfChangedLines);
+                lineNumberOffset -= numberOfChangedLines;
+                break;
+        }
+        
+        result.Print();
+        
+        return result;
     }
 }
