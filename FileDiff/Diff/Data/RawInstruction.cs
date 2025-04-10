@@ -1,4 +1,4 @@
-namespace FileDiff.Services.Data;
+namespace FileDiff.Diff.Data;
 
 public struct RawInstruction(RawInstruction.Type instructionType, int lineNumber, string content)
 {

@@ -1,7 +1,7 @@
-using FileDiff.Services.Algorithm;
-using FileDiff.Services.Data;
+using FileDiff.Diff.Algorithm;
+using FileDiff.Diff.Data;
 
-namespace FileDiff.Services;
+namespace FileDiff.Diff;
 
 public static class FileComparer
 {
@@ -11,7 +11,7 @@ public static class FileComparer
     /// <param name="lines1">First list of lines</param>
     /// <param name="lines2">Second list of lines</param>
     /// <returns>List of <see cref="Instruction"/> containing the sequence</returns>
-    public static List<Instruction> Compare(List<string> lines1, List<string> lines2)
+    public static List<Instruction> Compare(IEnumerable<string> lines1, IEnumerable<string> lines2)
     {
         var rawInstructions = new MyersComparer(lines1, lines2).Compare();
         var instructions = ProcessInstructions(rawInstructions);

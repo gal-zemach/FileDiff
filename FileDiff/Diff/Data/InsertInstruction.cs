@@ -1,4 +1,4 @@
-namespace FileDiff.Services.Data;
+namespace FileDiff.Diff.Data;
 
 /// <summary>
 /// Represents an instruction for inserting new lines 

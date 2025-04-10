@@ -1,5 +1,5 @@
-﻿using FileDiff.Services;
-using FileDiff.Services.Data;
+﻿using FileDiff.Diff;
+using FileDiff.Diff.Data;
 
 namespace FileDiff;
 
@@ -16,16 +16,28 @@ internal static class Program
     /// <param name="args">Paths for both files</param>
     private static void Main(string[] args)
     {
-        if (args.Length < EXPECTED_ARGS_COUNT)
+        if (args.Length != EXPECTED_ARGS_COUNT)
         {
             Console.WriteLine("Usage: FileDiff <file1> <file2>");
+            return;
+        }
+
+        IEnumerable<string> lines1;
+        IEnumerable<string> lines2;
+        
+        try
+        {
+            lines1 = File.ReadAllLines(args[0]);
+            lines2 = File.ReadAllLines(args[1]);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            Console.WriteLine("Could not read file. Aborting.");
+            return;
         }
         
-        List<string> lines1 = FileService.ReadAllLines(args[0]).ToList();
-        List<string> lines2 = FileService.ReadAllLines(args[1]).ToList();
-        
         List<Instruction> diff = FileComparer.Compare(lines1, lines2);
-
         PrintInstructions(diff);
     }
 

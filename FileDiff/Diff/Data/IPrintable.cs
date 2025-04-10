@@ -1,4 +1,4 @@
-namespace FileDiff.Services.Data;
+namespace FileDiff.Diff.Data;
 
 /// <summary>
 /// Interface for objects that can be printed
