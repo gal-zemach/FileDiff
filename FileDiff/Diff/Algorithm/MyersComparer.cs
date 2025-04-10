@@ -129,30 +129,27 @@ public static class MyersComparer
     private static Tuple<List<int>, List<int>> TokenizeLists(List<string> lines1, List<string> lines2)
     {
         Dictionary<string, int> tokensDictionary = new Dictionary<string, int>();
-        List<int> lines1Tokens = new List<int>();
-        List<int> lines2Tokens = new List<int>();
-        
         int nextToken = 0;
-        foreach (var line in lines1)
-        {
-            if (!tokensDictionary.TryGetValue(line, out var token))
-            {
-                token = nextToken++;
-                tokensDictionary[line] = token;
-            }
-            lines1Tokens.Add(token);
-        }
         
-        foreach (var line in lines2)
-        {
-            if (!tokensDictionary.TryGetValue(line, out var token))
-            {
-                token = nextToken++;
-                tokensDictionary[line] = token;
-            }
-            lines2Tokens.Add(token);
-        }
+        List<int> lines1Tokens = TokenizeList(lines1, tokensDictionary, ref nextToken);
+        List<int> lines2Tokens = TokenizeList(lines2, tokensDictionary, ref nextToken);
         
         return new Tuple<List<int>, List<int>>(lines1Tokens, lines2Tokens);
+    }
+
+    private static List<int> TokenizeList(List<string> list, Dictionary<string, int> tokensDictionary, ref int nextToken)
+    {
+        var listTokens = new List<int>();
+        foreach (var line in list)
+        {
+            if (!tokensDictionary.TryGetValue(line, out var token))
+            {
+                token = nextToken++;
+                tokensDictionary[line] = token;
+            }
+            listTokens.Add(token);
+        }
+
+        return listTokens;
     }
 }
