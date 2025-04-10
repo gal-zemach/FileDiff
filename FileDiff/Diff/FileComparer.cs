@@ -19,23 +19,23 @@ public static class FileComparer
         return instructions;
     }
 
-    private static List<Instruction> ProcessInstructions(List<RawInstruction> rawInstructions)
+    private static List<Instruction> ProcessInstructions(List<Instruction> rawInstructions)
     {
         if (rawInstructions.Count == 0)
         {
             return new List<Instruction>();
         }
         
-        List<List<RawInstruction>> groups = GroupRawInstructions(rawInstructions);
+        List<List<Instruction>> groups = GroupRawInstructions(rawInstructions);
         List<Instruction> instructions = BuildInstructions(groups);
         
         return instructions;
     }
 
-    private static List<List<RawInstruction>> GroupRawInstructions(List<RawInstruction> rawInstructions)
+    private static List<List<Instruction>> GroupRawInstructions(List<Instruction> rawInstructions)
     {
-        List<List<RawInstruction>> groups = new List<List<RawInstruction>>();
-        var currentGroup = new List<RawInstruction>(){ rawInstructions[0] };
+        List<List<Instruction>> groups = new List<List<Instruction>>();
+        var currentGroup = new List<Instruction>(){ rawInstructions[0] };
         groups.Add(currentGroup);
 
         for (int i = 1; i < rawInstructions.Count; i++)
@@ -44,13 +44,13 @@ public static class FileComparer
             var current = rawInstructions[i];
 
             if (current.InstructionType == previous.InstructionType &&
-                current.LineNumber - 1 == previous.LineNumber)
+                current.StartingLine - 1 == previous.StartingLine)
             {
                 currentGroup.Add(current);
             }
             else
             {
-                currentGroup = new List<RawInstruction>() { current };
+                currentGroup = new List<Instruction>() { current };
                 groups.Add(currentGroup);
             }
         }
@@ -58,7 +58,7 @@ public static class FileComparer
         return groups;
     }
 
-    private static List<Instruction> BuildInstructions(List<List<RawInstruction>> rawInstructionGroups)
+    private static List<Instruction> BuildInstructions(List<List<Instruction>> rawInstructionGroups)
     {
         var result = new List<Instruction>();
         int lineNumberOffset = 0;
@@ -74,15 +74,15 @@ public static class FileComparer
         return result;
     }
 
-    private static Instruction? BuildInstruction(List<RawInstruction> instructions, ref int lineNumberOffset)
+    private static Instruction? BuildInstruction(List<Instruction> instructions, ref int lineNumberOffset)
     {
-        RawInstruction.Type instructionType = instructions[0].InstructionType;
-        if (instructionType == RawInstruction.Type.None)
+        Instruction.Type instructionType = instructions[0].InstructionType;
+        if (instructionType == Instruction.Type.None)
         {
             return null;
         }
         
-        int startLine = instructions[0].LineNumber + 1;  // 1 is added for 1-based printing
+        int startLine = instructions[0].StartingLine + 1;  // 1 is added for 1-based printing
         int numberOfChangedLines = 1;
         string content = instructions[0].Content;
 
@@ -96,14 +96,14 @@ public static class FileComparer
         Instruction? result = null;
         switch (instructionType)
         {
-            case RawInstruction.Type.Insert:
-                // no need to add offset since all lines up-to startLine are identical to file2
+            case Instruction.Type.Insert:
+                // no need to add lineNumberOffset since all lines up-to startLine are identical to file2
                 result = new InsertInstruction(startLine, numberOfChangedLines, content);
                 lineNumberOffset += numberOfChangedLines;
                 break;
 
-            case RawInstruction.Type.Remove:
-                result = new RemoveInstruction(startLine + lineNumberOffset, numberOfChangedLines);
+            case Instruction.Type.Remove:
+                result = new RemoveInstruction(startLine + lineNumberOffset, numberOfChangedLines, content);
                 lineNumberOffset -= numberOfChangedLines;
                 break;
         }

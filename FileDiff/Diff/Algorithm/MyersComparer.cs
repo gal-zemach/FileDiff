@@ -27,10 +27,10 @@ public class MyersComparer
     /// <summary>
     /// Compares the 2 files and returns a sequence of instructions for transforming file1 into file2
     /// </summary>
-    public List<RawInstruction> Compare()
+    public List<Instruction> Compare()
     {
         List<int[]> trace = BuildMyersTrace(_lines1, _lines2);
-        List<RawInstruction> instructions = Traceback(trace);
+        List<Instruction> instructions = Traceback(trace);
         
         return instructions;
     }
@@ -85,9 +85,9 @@ public class MyersComparer
         return trace;
     }
 
-    private List<RawInstruction> Traceback(List<int[]> trace)
+    private List<Instruction> Traceback(List<int[]> trace)
     {
-        List<RawInstruction> instructions = [];
+        List<Instruction> instructions = [];
 
         int x = _lines1.Count;
         int y = _lines2.Count;
@@ -121,8 +121,8 @@ public class MyersComparer
             if (d > 0)
             {
                 instructions.Add(isDownwardMove
-                    ? new RawInstruction(RawInstruction.Type.Insert, y - 1, _lines2[y - 1])
-                    : new RawInstruction(RawInstruction.Type.Remove, x - 1, _lines1[x - 1]));
+                    ? new InsertInstruction(y - 1, 1, _lines2[y - 1])
+                    : new RemoveInstruction(x - 1, 1, _lines1[x - 1]));
             }
             
             x = prevX;

@@ -5,14 +5,14 @@ namespace FileDiff.Diff.Data;
 /// </summary>
 public class RemoveInstruction : Instruction
 {
-    public RemoveInstruction(int startingLineNumber, int numberOfLinesToChange)
+    public RemoveInstruction(int startingLine, int linesCount, string content) : base(
+        startingLine, linesCount, content)
     {
-        StartingLineNumber = startingLineNumber;
-        NumberOfLinesToChange = numberOfLinesToChange;
+        InstructionType = Type.Remove;
     }
     
     public override void Print()
     {
-        Console.WriteLine($"Remove {NumberOfLinesToChange} lines from line {StartingLineNumber}");
+        Console.WriteLine($"Remove {LinesCount} lines from line {StartingLine}");
     }
 }
