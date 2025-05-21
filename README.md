@@ -1,11 +1,9 @@
 # File Diff
-### Home Assigment Response by Gal Zemach 
+### Compares files using the Myers Algoritm 
 
 An application that prints the diff between two given files.
 Prints human-readable instructions for transforming file1 into file2.
 The app uses the Myers algorithm for computing the instructions.
-
-This is a submission for EA Tools Software Engineer (Req ID 203906) Home Assigment by Gal Zemach.
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
