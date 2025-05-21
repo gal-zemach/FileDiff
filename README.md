@@ -1,5 +1,5 @@
 # File Diff
-### Compares files using the Myers Algoritm 
+### Compares files using the Myers Algorithm 
 
 An application that prints the diff between two given files.
 Prints human-readable instructions for transforming file1 into file2.
